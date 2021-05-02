@@ -18,30 +18,7 @@ chmod +x /tmp/truncate /tmp/ddnz
 
 board_id=$(cat /etc/board.json | jsonfilter -e '@["model"].id' | sed 's/friendly.*,nanopi-//;s/xunlong,orangepi-//;s/^r1s-h5$/r1s/;s/^r1$/r1s-h3/;s/^r1-plus$/r1p/')
 mount -t tmpfs -o remount,size=850m tmpfs /tmp
-rm -rf /tmp/upg && mkdir /tmp/upg && cd /tmp/upg
-set +e
-wget https://ghproxy.com/https://github.com/klever1988/nanopi-openwrt/releases/download/2021-04-27/$board_id$ver.img.gz -O- | gzip -dc > $board_id.img
-if [ $? -eq 0 ]; then
-	wget https://ghproxy.com/https://github.com/klever1988/nanopi-openwrt/releases/download/2021-04-27/$board_id$ver.img.md5 -O md5sum.txt
-	echo -e '\e[92m今天固件已下载，准备解压\e[0m'
-else
-	echo -e '\e[91m今天的固件还没更新，尝试下载昨天的固件\e[0m'
-	wget https://ghproxy.com/https://github.com/klever1988/nanopi-openwrt/releases/download/$(date -d "@$(( $(busybox date +%s) - 86400))" +%Y-%m-%d)/$board_id$ver.img.gz -O- | gzip -dc > $board_id.img
-	if [ $? -eq 0 ]; then
-		wget https://ghproxy.com/https://github.com/klever1988/nanopi-openwrt/releases/download/$(date -d "@$(( $(busybox date +%s) - 86400))" +%Y-%m-%d)/$board_id$ver.img.md5 -O md5sum.txt
-		echo -e '\e[92m昨天的固件已下载，准备解压\e[0m'
-	else
-		echo -e '\e[91m没找到最新的固件，脚本退出\e[0m'
-		exit 1
-	fi
-fi
-set -e
-
-sed -i 's/-slim//;s/-with-docker//' md5sum.txt
-if [ `md5sum -c md5sum.txt|grep -c "OK"` -eq 0 ]; then
-	echo -e '\e[91m固件HASH值匹配失败，脚本退出\e[0m'
-	exit 1
-fi
+cd /tmp/upg
 
 mv $board_id.img FriendlyWrt.img
 
