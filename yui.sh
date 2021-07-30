@@ -20,13 +20,7 @@ board_id=$(cat /etc/board.json | jsonfilter -e '@["model"].id' | sed 's/friendly
 mount -t tmpfs -o remount,size=850m tmpfs /tmp
 cd /tmp/upg
 
-sed -i 's/-slim//;s/-with-docker//' md5sum.txt
-if [ `md5sum -c md5sum.txt|grep -c "OK"` -eq 0 ]; then
-	echo -e '\e[91m固件HASH值匹配失败，脚本退出\e[0m'
-	exit 1
-fi
-
-mv $board_id.img FriendlyWrt.img
+mv r1s-h3-slim.img FriendlyWrt.img
 
 bs=`expr $(cat /sys/block/mmcblk0/size) \* 512`
 truncate -s $bs FriendlyWrt.img || ../truncate -s $bs FriendlyWrt.img
